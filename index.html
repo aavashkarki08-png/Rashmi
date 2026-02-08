@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dear Vena Fun Meter 🎉</title>
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:black;
+color:white;
+text-align:center;
+overflow:hidden;
+}
+.screen{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+}
+button{
+padding:12px 20px;
+margin:10px;
+border:none;
+border-radius:25px;
+font-size:16px;
+cursor:pointer;
+transition:0.2s;
+}
+button:hover{transform:scale(1.1);}
+.hidden{display:none;}
+#notify{
+background:#111;
+border:1px solid #444;
+padding:15px;
+border-radius:15px;
+animation:fadeIn 1s;
+}
+.loading-bar{
+width:70%;
+height:15px;
+background:#333;
+border-radius:10px;
+margin-top:20px;
+}
+.loading-fill{
+height:100%;
+width:0%;
+background:#ff4d6d;
+border-radius:10px;
+transition:width 3s linear;
+}
+#meter{
+width:70%;
+height:20px;
+background:#333;
+border-radius:10px;
+margin:20px auto;
+}
+#fill{
+height:100%;
+width:0%;
+background:#4CAF50;
+border-radius:10px;
+transition:0.4s;
+}
+.heart, .star{
+position:absolute;
+font-size:30px;
+cursor:pointer;
+animation:float 6s linear infinite;
+opacity:0.7;
+}
+@keyframes float{
+0%{transform:translateY(100vh);}
+100%{transform:translateY(-10vh);}
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.confetti{
+position:absolute;
+width:10px;height:10px;
+animation:fall 3s linear infinite;
+}
+@keyframes fall{
+0%{transform:translateY(-10vh) rotate(0);}
+100%{transform:translateY(100vh) rotate(360deg);}
+}
+#postcard{
+position:fixed;top:50%;left:50%;
+transform:translate(-50%,-50%);
+width:300px;
+padding:20px;
+border-radius:20px;
+background:linear-gradient(135deg,#ffefba,#ffc3a0);
+color:black;
+text-align:center;
+font-size:18px;
+display:none;
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<audio id="music" autoplay loop>
+<source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Screen 1: Notification -->
+<div class="screen" id="screen1">
+<div id="notify">
+📱 New message from your Dear Vena 💌<br><br>
+<button onclick="startVault()">Open</button>
+</div>
+</div>
+
+<!-- Screen 2: Fun Vault Loading -->
+<div class="screen hidden" id="screen2">
+<h2>ACCESSING VENA FUN SYSTEM...</h2>
+<div class="loading-bar">
+<div class="loading-fill" id="loadFill"></div>
+</div>
+</div>
+
+<!-- Screen 3: Fun Meter Game -->
+<div class="screen hidden" id="screen3">
+<h3>Fun Meter Game 🌟</h3>
+<div id="meter"><div id="fill"></div></div>
+</div>
+
+<!-- Screen 4+: Questions will be dynamic -->
+<div class="screen hidden" id="questionScreen">
+<h3 id="questionText"></h3>
+<div id="optionsContainer"></div>
+</div>
+
+<!-- Screen 5: Countdown -->
+<div class="screen hidden" id="screen5">
+<h2>Almost there… get ready for surprise!</h2>
+<h1 id="count">3</h1>
+</div>
+
+<!-- Screen 6: Final playful buttons -->
+<div class="screen hidden" id="screen6">
+<h2>Congrats! You unlocked your surprise 🎁✨</h2>
+<button onclick="celebrate()">Show Me! 🎁</button>
+<button onclick="celebrate()">Open Now 😏</button>
+<button onclick="celebrate()">Can’t Wait 😂</button>
+<button onclick="alert('Haha you can’t resist 😜')">I’m curious 😜</button>
+<button onclick="alert('Tell me! 😎')">What’s inside? 🤔</button>
+<button onclick="alert('No cheating! 😂')">Give me! 😏</button>
+</div>
+
+<!-- Postcard -->
+<div id="postcard">💌 Vena thinks you’re awesome 😎💖</div>
+
+<script>
+let starsCaught=0;
+let currentQuestion=0;
+
+// Questions array
+const questions=[
+{q:"What emoji describes your mood today?", options:["😄 Haha yep!","😎 Cool beans!","😂 Lol, perfect","😜 Cheeky!"]},
+{q:"Pick your favorite snack 🍕🍩🍫🍿", options:["Pizza 🍕 Yum!","Donuts 🍩 Sweet!","Chocolate 🍫 Yes!","Popcorn 🍿 Crunch!"]},
+{q:"Best way to prank Vena?", options:["Water balloon 💦","Fake spider 🕷","Hide snacks 🤫","Dance suddenly 💃"]},
+];
+
+const questionScreen=document.getElementById("questionScreen");
+const questionText=document.getElementById("questionText");
+const optionsContainer=document.getElementById("optionsContainer");
+
+setInterval(()=>{
+let bgStar=document.createElement("div");
+bgStar.className="star";
+bgStar.innerHTML="🌟";
+bgStar.style.left=Math.random()*window.innerWidth+"px";
+bgStar.style.fontSize=(20+Math.random()*20)+"px";
+document.body.appendChild(bgStar);
+setTimeout(()=>bgStar.remove(),6000);
+},800);
+
+// Start Vault
+function startVault(){
+document.getElementById("screen1").classList.add("hidden");
+document.getElementById("screen2").classList.remove("hidden");
+setTimeout(()=>{document.getElementById("loadFill").style.width="100%";},100);
+setTimeout(()=>{
+document.getElementById("screen2").classList.add("hidden");
+document.getElementById("screen3").classList.remove("hidden");
+spawnStar();
+},3000);
+}
+
+// Fun Meter Game
+function spawnStar(){
+let star=document.createElement("div");
+star.className="star";
+star.innerHTML="🌟";
+star.style.left=Math.random()*window.innerWidth+"px";
+star.style.top=Math.random()*window.innerHeight+"px";
+star.onclick=function(){
+starsCaught++;
+document.getElementById("fill").style.width=(starsCaught*33)+"%";
+star.remove();
+if(starsCaught<3){spawnStar();}
+else{document.getElementById("screen3").classList.add("hidden"); showQuestion();}
+}
+document.body.appendChild(star);
+}
+
+// Questions
+function showQuestion(){
+questionScreen.classList.remove("hidden");
+currentQuestion=0;
+displayQuestion();
+}
+
+function displayQuestion(){
+let q=questions[currentQuestion];
+questionText.innerText=q.q;
+optionsContainer.innerHTML="";
+q.options.forEach(opt=>{
+let btn=document.createElement("button");
+btn.innerText=opt;
+btn.onclick=function(){
+alert(opt);
+currentQuestion++;
+if(currentQuestion<questions.length){displayQuestion();}
+else{questionScreen.classList.add("hidden"); startCountdown();}
+}
+optionsContainer.appendChild(btn);
+});
+}
+
+// Countdown
+function startCountdown(){
+document.getElementById("screen5").classList.remove("hidden");
+let num=3;
+let counter=setInterval(()=>{
+num--;
+document.getElementById("count").innerText=num;
+if(num==0){
+clearInterval(counter);
+document.getElementById("screen5").classList.add("hidden");
+document.getElementById("screen6").classList.remove("hidden");
+setTimeout(()=>{document.getElementById("postcard").style.display="block";},1000);
+}
+},1000);
+}
+
+// Final playful confetti
+function celebrate(){
+document.body.innerHTML="<h1 style='margin-top:200px;'>🎉 Surprise Activated! 🎉</h1>";
+for(let i=0;i<120;i++){
+let conf=document.createElement("div");
+conf.className="confetti";
+conf.style.left=Math.random()*window.innerWidth+"px";
+conf.style.background="hsl("+Math.random()*360+",100%,50%)";
+document.body.appendChild(conf);
+}
+document.getElementById("postcard").style.display="block";
+}
+</script>
+
+</body>
+</html>
